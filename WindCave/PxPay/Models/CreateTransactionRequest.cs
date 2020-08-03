@@ -95,13 +95,6 @@ namespace BryantBrothers.WindCave.PxPay
 		public string TxnData3 { get; set; }
 
 		/// <summary>
-		/// Required.
-		/// Purchase processes immediately.  
-		/// Auth reserves the specified amount for up to 7 days.  You will still need to Complete the transaction.
-		/// </summary>
-		public TransactionType TxnType { get; set; }
-
-		/// <summary>
 		/// Required (Max 16 bytes).
 		/// Should always contain a unique, merchant application generated value that uniquely identifies the transaction.
 		/// Used by Windcave® to check for a duplicate transaction generated from Merchant web site. 

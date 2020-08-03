@@ -34,78 +34,25 @@ namespace BryantBrothers.WindCave.PxPay
         }
 
         /// <summary>
-        /// Create a new PX Pay transaction
+        /// Create a new PX Pay Purchase transaction.
+        /// This will process the transaction immediately.
         /// </summary>
         /// <param name="transactionRequest"> Details of the transaction to create. </param>
         /// <returns></returns>
-        public CreateTransactionResult CreateTransaction(CreateTransactionRequest transactionRequest)
+        public CreateTransactionResult CreatePurchase(CreateTransactionRequest transactionRequest)
         {
-            // Ensure we use TLS 1.2
-            if (UseTls12)
-            {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            }
+            return CreateTransaction(transactionRequest, TransactionType.Purchase);
+        }
 
-            var result = new CreateTransactionResult
-            {
-                IsSuccessful = false
-            };
-
-            var xmlRequest = BuildTransactionXmlRequest(transactionRequest);
-
-            try
-            {
-                // Post to Paystation URL
-                var httpResponse = WebClient.PostAsync(WindCaveUrl, new StringContent(xmlRequest.ToString()))
-                    .GetAwaiter()
-                    .GetResult();
-
-                var rawResponse = httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-                // Check if successful
-                if (!httpResponse.IsSuccessStatusCode)
-                {
-                    result.Error = new ErrorDetails
-                    {
-                        ErrorMessage = "Could not access payment gateway!"
-                    };
-
-                    return result;
-                }
-
-                // Deserialise XML result     
-                var response = new XmlDocument();
-                response.LoadXml(rawResponse);
-
-                var rootNode = response.GetElementsByTagName("Request")[0];
-
-                var isValid = rootNode.Attributes["valid"].Value == "1";
-
-                // Check if valid
-                if (!isValid)
-                {
-                    result.Error = new ErrorDetails
-                    {
-                        ErrorMessage = "Invalid request to payment gateway!"
-                    };
-
-                    return result;
-                }
-
-                var uri = GetString(response, "URI");
-
-                // Success
-                result.SecurePaymentUrl = new Uri(uri);
-                result.IsSuccessful = true;
-            }
-            catch (Exception e)
-            {
-                result.Error = new ErrorDetails { 
-                    ErrorMessage = $"Exception occured creating payment transaction. {e.Message.ToString()}" 
-                };
-            }
-
-            return result;
+        /// <summary>
+        /// Create a new PX Pay Auth transaction.
+        /// Authorise will reserve the amount for up to 7 days after which time it will revert.  A complete transaction will be required to Complete the Auth.
+        /// </summary>
+        /// <param name="transactionRequest"> Details of the transaction to create. </param>
+        /// <returns></returns>
+        public CreateTransactionResult CreateAuth(CreateTransactionRequest transactionRequest)
+        {
+            return CreateTransaction(transactionRequest, TransactionType.Auth);
         }
 
         /// <summary>
@@ -183,7 +130,85 @@ namespace BryantBrothers.WindCave.PxPay
             return transactionDetails;
         }
 
-		#region Private methods...
+        #region Private methods...
+
+        /// <summary>
+        /// Create a new PX Pay transaction
+        /// </summary>
+        /// <param name="transactionRequest"> Details of the transaction to create. </param>
+        /// <param name="transactionType"> Transaction Type (Purchase or Auth) </param>
+        /// <returns></returns>
+        private CreateTransactionResult CreateTransaction(CreateTransactionRequest transactionRequest, TransactionType transactionType)
+        {
+            // Ensure we use TLS 1.2
+            if (UseTls12)
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            }
+
+            // Build the request
+            var xmlRequest = BuildTransactionXmlRequest(transactionRequest, transactionType);
+
+            var result = new CreateTransactionResult
+            {
+                IsSuccessful = false
+            };
+
+            try
+            {
+                // Post to Paystation URL
+                var httpResponse = WebClient.PostAsync(WindCaveUrl, new StringContent(xmlRequest.ToString()))
+                    .GetAwaiter()
+                    .GetResult();
+
+                var rawResponse = httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                // Check if successful
+                if (!httpResponse.IsSuccessStatusCode)
+                {
+                    result.Error = new ErrorDetails
+                    {
+                        ErrorMessage = "Could not access payment gateway!"
+                    };
+
+                    return result;
+                }
+
+                // Deserialise XML result     
+                var response = new XmlDocument();
+                response.LoadXml(rawResponse);
+
+                var rootNode = response.GetElementsByTagName("Request")[0];
+
+                var isValid = rootNode.Attributes["valid"].Value == "1";
+
+                // Check if valid
+                if (!isValid)
+                {
+                    result.Error = new ErrorDetails
+                    {
+                        ErrorMessage = "Invalid request to payment gateway!"
+                    };
+
+                    return result;
+                }
+
+                var uri = GetString(response, "URI");
+
+                // Success
+                result.SecurePaymentUrl = new Uri(uri);
+                result.IsSuccessful = true;
+            }
+            catch (Exception e)
+            {
+                result.Error = new ErrorDetails
+                {
+                    ErrorMessage = $"Exception occured creating payment transaction. {e.Message.ToString()}"
+                };
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Gets the string value of a tag within an XMLDoc.
@@ -235,8 +260,9 @@ namespace BryantBrothers.WindCave.PxPay
 		/// Builds the XML request for a new Transaction.
 		/// </summary>
 		/// <param name="transactionRequest"> Transaction request details </param>
+        /// <param name="transactionType"> Transaction Type </param>
 		/// <returns></returns>
-		private XElement BuildTransactionXmlRequest(CreateTransactionRequest transactionRequest)
+		private XElement BuildTransactionXmlRequest(CreateTransactionRequest transactionRequest, TransactionType transactionType)
         {
             // These fields are required
             var fields = new List<XElement> {
@@ -303,7 +329,7 @@ namespace BryantBrothers.WindCave.PxPay
             }
 
             // TxnType (required)
-            fields.Add(new XElement("TxnType", transactionRequest.TxnType.ToString()));
+            fields.Add(new XElement("TxnType", transactionType.ToString()));
 
             // TxnId (required)
             fields.Add(new XElement("TxnId", transactionRequest.TxnId));
