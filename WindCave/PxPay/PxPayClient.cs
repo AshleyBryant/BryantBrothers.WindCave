@@ -90,7 +90,7 @@ namespace BryantBrothers.WindCave.PxPay
                 var response = new XmlDocument();
                 response.LoadXml(rawResponse);
 
-                var rootNode = response.GetElementsByTagName("Request")[0];
+                var rootNode = response.GetElementsByTagName("Response")[0];
 
                 // Valid attribute
                 transactionDetails.ValidTransaction = rootNode.Attributes["valid"].Value == "1";
@@ -107,14 +107,22 @@ namespace BryantBrothers.WindCave.PxPay
                 transactionDetails.DpsBillingId = GetString(response, "DpsBillingId");
                 transactionDetails.CardHolderName = GetString(response, "CardHolderName");
                 transactionDetails.CurrencySettlement = GetEnum<PxPayCurrency>(response, "CurrencySettlement");
-                transactionDetails.PaymentMethod = GetString(response, "PaymentMethod");
+                transactionDetails.PaymentMethod = "card payment";
+                if (TagExists(response, "PaymentMethod"))
+                {
+                    transactionDetails.PaymentMethod = GetString(response, "PaymentMethod");
+                }
                 transactionDetails.TxnData1 = GetString(response, "TxnData1");
                 transactionDetails.TxnData2 = GetString(response, "TxnData2");
                 transactionDetails.TxnData3 = GetString(response, "TxnData3");
                 transactionDetails.TxnType = GetEnum<TransactionType>(response, "TxnType");
                 transactionDetails.CurrencyInput = GetEnum<PxPayCurrency>(response, "CurrencyInput");
                 transactionDetails.MerchantReference = GetString(response, "MerchantReference");
-                transactionDetails.ClientIpAddress = GetString(response, "ClientIpAddress");
+                transactionDetails.ClientIpAddress = null;
+                if (TagExists(response, "ClientIpAddress"))
+                {
+                    transactionDetails.ClientIpAddress = GetString(response, "ClientIpAddress");
+                }
                 transactionDetails.TxnId = GetString(response, "TxnId");
                 transactionDetails.EmailAddress = GetString(response, "EmailAddress");
                 transactionDetails.BillingId = GetString(response, "BillingId");
@@ -193,11 +201,25 @@ namespace BryantBrothers.WindCave.PxPay
                     return result;
                 }
 
-                var uri = GetString(response, "URI");
+                var hasResponseCode = TagExists(response, "Reco");
+                if (hasResponseCode)
+                {
+                    var reco = GetString(response, "Reco");
+                    var responseText = GetString(response, "ResponseText");
 
-                // Success
-                result.SecurePaymentUrl = new Uri(uri);
-                result.IsSuccessful = true;
+                    result.Error = new ErrorDetails
+                    {
+                        ErrorMessage = $"Response code: {reco} - {responseText}"
+                    };
+                } 
+                else
+                {
+                    var uri = GetString(response, "URI");
+
+                    // Success
+                    result.SecurePaymentUrl = new Uri(uri);
+                    result.IsSuccessful = true;
+                }
             }
             catch (Exception e)
             {
@@ -220,6 +242,17 @@ namespace BryantBrothers.WindCave.PxPay
 		{
             return xml.GetElementsByTagName(tagName)[0].InnerText;
         }
+
+        /// <summary>
+        /// Returns true if the tag exists, false otherwise.
+        /// </summary>
+        /// <param name="xml"> XmlDocument </param>
+        /// <param name="tagName"> Name of tag to check </param>
+        /// <returns></returns>
+        private bool TagExists(XmlDocument xml, string tagName)
+		{
+            return xml.GetElementsByTagName(tagName).Count > 0;
+		}
 
         /// <summary>
         /// Gets the string value from the XMLDoc and converts it to the given type.
@@ -268,7 +301,7 @@ namespace BryantBrothers.WindCave.PxPay
             var fields = new List<XElement> {
                 new XElement("PxPayUserId", PxPayUserId),                                
                 new XElement("PxPayKey", PxPayKey),                                      
-                new XElement("AmountInput", transactionRequest.Amount.ToString("0.00")), 
+                new XElement("AmountInput", (transactionRequest.Amount / 100.0).ToString("0.00")), 
             };
 
             // BillingId (optional)
