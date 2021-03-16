@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BryantBrothers.WindCave.WindCave.PxPay.Enums
+namespace BryantBrothers.WindCave.WindCave.Enums
 {
 	/// <summary>
-	/// Valid currencies to use with PX Pay.
+	/// Valid currencies to use with WindCave transactions.
 	/// </summary>
-	public enum PxPayCurrency
+	public enum WindCaveCurrency
 	{
 		/// <summary>
 		/// Australian Dollar 

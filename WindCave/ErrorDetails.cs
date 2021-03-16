@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BryantBrothers.WindCave.PxPay
+namespace BryantBrothers.WindCave
 {
 	/// <summary>
 	/// Error Details

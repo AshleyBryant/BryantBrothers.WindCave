@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Xml;
 using System.Xml.Linq;
+using BryantBrothers.WindCave.WindCave.Enums;
 using BryantBrothers.WindCave.WindCave.PxPay.Enums;
 
 namespace BryantBrothers.WindCave.PxPay
@@ -106,7 +107,7 @@ namespace BryantBrothers.WindCave.PxPay
                 transactionDetails.ResponseText = GetString(response, "ResponseText");
                 transactionDetails.DpsBillingId = GetString(response, "DpsBillingId");
                 transactionDetails.CardHolderName = GetString(response, "CardHolderName");
-                transactionDetails.CurrencySettlement = GetEnum<PxPayCurrency>(response, "CurrencySettlement");
+                transactionDetails.CurrencySettlement = GetEnum<WindCaveCurrency>(response, "CurrencySettlement");
                 transactionDetails.PaymentMethod = "card payment";
                 if (TagExists(response, "PaymentMethod"))
                 {
@@ -116,7 +117,7 @@ namespace BryantBrothers.WindCave.PxPay
                 transactionDetails.TxnData2 = GetString(response, "TxnData2");
                 transactionDetails.TxnData3 = GetString(response, "TxnData3");
                 transactionDetails.TxnType = GetEnum<TransactionType>(response, "TxnType");
-                transactionDetails.CurrencyInput = GetEnum<PxPayCurrency>(response, "CurrencyInput");
+                transactionDetails.CurrencyInput = GetEnum<WindCaveCurrency>(response, "CurrencyInput");
                 transactionDetails.MerchantReference = GetString(response, "MerchantReference");
                 transactionDetails.ClientIpAddress = null;
                 if (TagExists(response, "ClientIpAddress"))

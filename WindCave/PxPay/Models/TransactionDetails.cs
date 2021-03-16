@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using BryantBrothers.WindCave.WindCave.Enums;
 using BryantBrothers.WindCave.WindCave.PxPay.Enums;
 
 namespace BryantBrothers.WindCave.PxPay
@@ -73,7 +74,7 @@ namespace BryantBrothers.WindCave.PxPay
 		/// <summary>
 		/// Used to specify the currency that was used for the transaction: AUD, USD, NZD etc.
 		/// </summary>
-		public PxPayCurrency CurrencySettlement { get; set; }
+		public WindCaveCurrency CurrencySettlement { get; set; }
 
 		/// <summary>
 		/// The final transaction response can contain the PaymentMethod field to indicate the specific payment method used for the transaction.
@@ -104,7 +105,7 @@ namespace BryantBrothers.WindCave.PxPay
 		/// <summary>
 		/// The currency requested for the transaction.
 		/// </summary>
-		public PxPayCurrency CurrencyInput { get; set; }
+		public WindCaveCurrency CurrencyInput { get; set; }
 
 		/// <summary>
 		/// The merchant reference passed to the transaction.

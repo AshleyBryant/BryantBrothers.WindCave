@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BryantBrothers.WindCave.WindCave.PxPay.Enums
+namespace BryantBrothers.WindCave.WindCave.Enums
 {
 	/// <summary>
 	/// Valid recurring mode options.

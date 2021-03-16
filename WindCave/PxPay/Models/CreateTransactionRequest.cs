@@ -1,4 +1,5 @@
 ﻿using System;
+using BryantBrothers.WindCave.WindCave.Enums;
 using BryantBrothers.WindCave.WindCave.PxPay.Enums;
 
 namespace BryantBrothers.WindCave.PxPay
@@ -9,7 +10,7 @@ namespace BryantBrothers.WindCave.PxPay
 	public class CreateTransactionRequest
 	{
 		/// <summary>
-		/// Required (Max "999999.99")
+		/// Required (Max 99999999).
 		/// The Amount in cents for the transaction.
 		/// </summary>
 		public int Amount { get; set; }
@@ -26,7 +27,7 @@ namespace BryantBrothers.WindCave.PxPay
 		/// Required.
 		/// Specifies the currency to be used e.g. “NZD” or “AUD”. 
 		/// </summary>
-		public PxPayCurrency CurrencyInput { get; set; }
+		public WindCaveCurrency CurrencyInput { get; set; }
 
 		/// <summary>
 		/// Optional (Max 255 bytes).
