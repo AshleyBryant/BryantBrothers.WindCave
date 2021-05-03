@@ -109,6 +109,7 @@ namespace BryantBrothers.WindCave.PxPost
 
                 // "Success"
                 var isValid = transactionNode.Attributes["success"].Value == "1";
+                var reco = transactionNode.Attributes["reco"].Value;
 
                 // Check if valid
                 if (!isValid)
@@ -121,26 +122,12 @@ namespace BryantBrothers.WindCave.PxPost
                     return result;
                 }
 
-                /*
-                var hasResponseCode = TagExists(response, "Reco");
-                if (hasResponseCode)
-                {
-                    var reco = GetString(response, "Reco");
-                    var responseText = GetString(response, "ResponseText");
-
-                    result.Error = new ErrorDetails
-                    {
-                        ErrorMessage = $"Response code: {reco} - {responseText}"
-                    };
-                }
-                else
-                {
-                    var uri = GetString(response, "URI");
-
-                    // Success
-                    result.SecurePaymentUrl = new Uri(uri);
-                    result.IsSuccessful = true;
-                }*/
+                // Get extra details
+                result.ExpiryDate = XmlHelper.GetString(transactionNode, "DateExpiry");
+                result.CardName = XmlHelper.GetString(transactionNode, "CardName");
+                
+                result.ResponseText = XmlHelper.GetString(rootNode, "ResponseText");
+                result.HelpText = XmlHelper.GetString(rootNode, "HelpText");
             }
             catch (Exception e)
             {
@@ -164,7 +151,7 @@ namespace BryantBrothers.WindCave.PxPost
             var fields = new List<XElement> {
                 new XElement("PostUsername", PxPostUsername),
                 new XElement("PostPassword", PxPostPassword),
-                new XElement("AmountInput", (transactionRequest.Amount / 100.0).ToString("0.00")),
+                new XElement("Amount", (transactionRequest.Amount / 100.0).ToString("0.00")),
             };
 
             // InputCurrency (required)

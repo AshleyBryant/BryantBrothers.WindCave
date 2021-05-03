@@ -97,38 +97,38 @@ namespace BryantBrothers.WindCave.PxPay
                 transactionDetails.ValidTransaction = rootNode.Attributes["valid"].Value == "1";
 
                 // Map fields
-                transactionDetails.AmountSettlement = Convert.ToInt32(GetString(response, "AmountSettlement").Replace(".", ""));
-                transactionDetails.AuthCode = GetString(response, "AuthCode");
-                transactionDetails.CardName = GetString(response, "CardName");
-                transactionDetails.CardNumber = GetString(response, "CardNumber");
-                transactionDetails.DateExpiry = GetString(response, "DateExpiry");
-                transactionDetails.DpsTxnRef = GetString(response, "DpsTxnRef");
-                transactionDetails.Success = GetString(response, "Success") == "1";
-                transactionDetails.ResponseText = GetString(response, "ResponseText");
-                transactionDetails.DpsBillingId = GetString(response, "DpsBillingId");
-                transactionDetails.CardHolderName = GetString(response, "CardHolderName");
-                transactionDetails.CurrencySettlement = GetEnum<WindCaveCurrency>(response, "CurrencySettlement");
+                transactionDetails.AmountSettlement = Convert.ToInt32(XmlHelper.GetString(response, "AmountSettlement").Replace(".", ""));
+                transactionDetails.AuthCode = XmlHelper.GetString(response, "AuthCode");
+                transactionDetails.CardName = XmlHelper.GetString(response, "CardName");
+                transactionDetails.CardNumber = XmlHelper.GetString(response, "CardNumber");
+                transactionDetails.DateExpiry = XmlHelper.GetString(response, "DateExpiry");
+                transactionDetails.DpsTxnRef = XmlHelper.GetString(response, "DpsTxnRef");
+                transactionDetails.Success = XmlHelper.GetString(response, "Success") == "1";
+                transactionDetails.ResponseText = XmlHelper.GetString(response, "ResponseText");
+                transactionDetails.DpsBillingId = XmlHelper.GetString(response, "DpsBillingId");
+                transactionDetails.CardHolderName = XmlHelper.GetString(response, "CardHolderName");
+                transactionDetails.CurrencySettlement = XmlHelper.GetEnum<WindCaveCurrency>(response, "CurrencySettlement");
                 transactionDetails.PaymentMethod = "card payment";
-                if (TagExists(response, "PaymentMethod"))
+                if (XmlHelper.TagExists(response, "PaymentMethod"))
                 {
-                    transactionDetails.PaymentMethod = GetString(response, "PaymentMethod");
+                    transactionDetails.PaymentMethod = XmlHelper.GetString(response, "PaymentMethod");
                 }
-                transactionDetails.TxnData1 = GetString(response, "TxnData1");
-                transactionDetails.TxnData2 = GetString(response, "TxnData2");
-                transactionDetails.TxnData3 = GetString(response, "TxnData3");
-                transactionDetails.TxnType = GetEnum<TransactionType>(response, "TxnType");
-                transactionDetails.CurrencyInput = GetEnum<WindCaveCurrency>(response, "CurrencyInput");
-                transactionDetails.MerchantReference = GetString(response, "MerchantReference");
+                transactionDetails.TxnData1 = XmlHelper.GetString(response, "TxnData1");
+                transactionDetails.TxnData2 = XmlHelper.GetString(response, "TxnData2");
+                transactionDetails.TxnData3 = XmlHelper.GetString(response, "TxnData3");
+                transactionDetails.TxnType = XmlHelper.GetEnum<TransactionType>(response, "TxnType");
+                transactionDetails.CurrencyInput = XmlHelper.GetEnum<WindCaveCurrency>(response, "CurrencyInput");
+                transactionDetails.MerchantReference = XmlHelper.GetString(response, "MerchantReference");
                 transactionDetails.ClientIpAddress = null;
-                if (TagExists(response, "ClientIpAddress"))
+                if (XmlHelper.TagExists(response, "ClientIpAddress"))
                 {
-                    transactionDetails.ClientIpAddress = GetString(response, "ClientIpAddress");
+                    transactionDetails.ClientIpAddress = XmlHelper.GetString(response, "ClientIpAddress");
                 }
-                transactionDetails.TxnId = GetString(response, "TxnId");
-                transactionDetails.EmailAddress = GetString(response, "EmailAddress");
-                transactionDetails.BillingId = GetString(response, "BillingId");
-                transactionDetails.TxnMac = GetString(response, "TxnMac");
-                transactionDetails.CardNumber2 = GetString(response, "CardNumber2");
+                transactionDetails.TxnId = XmlHelper.GetString(response, "TxnId");
+                transactionDetails.EmailAddress = XmlHelper.GetString(response, "EmailAddress");
+                transactionDetails.BillingId = XmlHelper.GetString(response, "BillingId");
+                transactionDetails.TxnMac = XmlHelper.GetString(response, "TxnMac");
+                transactionDetails.CardNumber2 = XmlHelper.GetString(response, "CardNumber2");
                 transactionDetails.Cvc2ResultCode = GetCvcResultCode(response, "Cvc2ResultCode");
             }
             catch (Exception ex)
@@ -202,11 +202,11 @@ namespace BryantBrothers.WindCave.PxPay
                     return result;
                 }
 
-                var hasResponseCode = TagExists(response, "Reco");
+                var hasResponseCode = XmlHelper.TagExists(response, "Reco");
                 if (hasResponseCode)
                 {
-                    var reco = GetString(response, "Reco");
-                    var responseText = GetString(response, "ResponseText");
+                    var reco = XmlHelper.GetString(response, "Reco");
+                    var responseText = XmlHelper.GetString(response, "ResponseText");
 
                     result.Error = new ErrorDetails
                     {
@@ -215,7 +215,7 @@ namespace BryantBrothers.WindCave.PxPay
                 } 
                 else
                 {
-                    var uri = GetString(response, "URI");
+                    var uri = XmlHelper.GetString(response, "URI");
 
                     // Success
                     result.SecurePaymentUrl = new Uri(uri);
@@ -234,42 +234,6 @@ namespace BryantBrothers.WindCave.PxPay
         }
 
         /// <summary>
-        /// Gets the string value of a tag within an XMLDoc.
-        /// </summary>
-        /// <param name="xml"> XmlDocument </param>
-        /// <param name="tagName"> Name of tag </param>
-        /// <returns></returns>
-        private string GetString(XmlDocument xml, string tagName)
-		{
-            return xml.GetElementsByTagName(tagName)[0].InnerText;
-        }
-
-        /// <summary>
-        /// Returns true if the tag exists, false otherwise.
-        /// </summary>
-        /// <param name="xml"> XmlDocument </param>
-        /// <param name="tagName"> Name of tag to check </param>
-        /// <returns></returns>
-        private bool TagExists(XmlDocument xml, string tagName)
-		{
-            return xml.GetElementsByTagName(tagName).Count > 0;
-		}
-
-        /// <summary>
-        /// Gets the string value from the XMLDoc and converts it to the given type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="xml"></param>
-        /// <param name="tagName"></param>
-        /// <returns></returns>
-        private T GetEnum<T>(XmlDocument xml, string tagName)
-		{
-            var val = GetString(xml, tagName);
-
-            return (T)Enum.Parse(typeof(T), val);
-        }
-
-        /// <summary>
         /// Maps the CvcResultCode field.
         /// </summary>
         /// <param name="xml"></param>
@@ -277,7 +241,7 @@ namespace BryantBrothers.WindCave.PxPay
         /// <returns></returns>
         private CvcResultCode GetCvcResultCode(XmlDocument xml, string tagName)
 		{
-            var result = GetString(xml, tagName);
+            var result = XmlHelper.GetString(xml, tagName);
 
 			switch (result)
 			{

@@ -12,5 +12,13 @@ namespace BryantBrothers.WindCave.PxPost
 		public bool IsSuccessful { get; set; }
 
 		public ErrorDetails Error { get; set; }
+
+		public string ExpiryDate { get; set; }
+
+		public string CardName { get; set; }
+
+		public string ResponseText { get; set; }
+
+		public string HelpText { get; set; }
 	}
 }
