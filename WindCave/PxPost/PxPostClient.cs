@@ -104,10 +104,11 @@ namespace BryantBrothers.WindCave.PxPost
                 var response = new XmlDocument();
                 response.LoadXml(rawResponse);
 
-                var rootNode = response.GetElementsByTagName("Request")[0];
+                var rootNode = response.GetElementsByTagName("Txn")[0];
+                var transactionNode = rootNode.SelectSingleNode("Transaction");
 
-                // "Success" ?
-                var isValid = rootNode.Attributes["valid"].Value == "1";
+                // "Success"
+                var isValid = transactionNode.Attributes["success"].Value == "1";
 
                 // Check if valid
                 if (!isValid)
@@ -161,8 +162,8 @@ namespace BryantBrothers.WindCave.PxPost
         {
             // These fields are required
             var fields = new List<XElement> {
-                new XElement("PostUsername ", PxPostUsername),
-                new XElement("PostPassword ", PxPostPassword),
+                new XElement("PostUsername", PxPostUsername),
+                new XElement("PostPassword", PxPostPassword),
                 new XElement("AmountInput", (transactionRequest.Amount / 100.0).ToString("0.00")),
             };
 
@@ -238,11 +239,11 @@ namespace BryantBrothers.WindCave.PxPost
             // RecurringMode (optional)
             if (transactionRequest.RecurringMode.HasValue)
             {
-                fields.Add(new XElement("RecurringMode", transactionRequest.RecurringMode.Value.ToString().ToLower()));
+                fields.Add(new XElement("RecurringMode", transactionRequest.RecurringMode.Value.ToString()));
             }
 
             // TxnType (required)
-            fields.Add(new XElement("TxnType", transactionRequest.TxnType.ToString().ToLower()));
+            fields.Add(new XElement("TxnType", transactionRequest.TxnType.ToString()));
 
             // TxnData1 (optional)
             if (!string.IsNullOrEmpty(transactionRequest.TxnData1))
