@@ -128,6 +128,8 @@ namespace BryantBrothers.WindCave.PxPost
                 
                 result.ResponseText = XmlHelper.GetString(rootNode, "ResponseText");
                 result.HelpText = XmlHelper.GetString(rootNode, "HelpText");
+
+                result.IsSuccessful = true;
             }
             catch (Exception e)
             {
